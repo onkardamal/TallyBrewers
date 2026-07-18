@@ -6,7 +6,6 @@ import com.securebank.auth.application.LoginService;
 import com.securebank.auth.application.LoginService.LoginResult;
 import com.securebank.auth.application.LoginService.StartResponse;
 import com.securebank.auth.application.RateLimiter;
-import com.securebank.auth.config.SecureBankProperties;
 import com.securebank.auth.domain.User;
 import com.securebank.auth.infrastructure.persistence.UserRepository;
 import com.securebank.auth.security.UserPrincipal;
@@ -16,8 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,16 +42,16 @@ public class LoginController {
     private final LoginService loginService;
     private final UserRepository userRepository;
     private final RateLimiter rateLimiter;
-    private final SecureBankProperties properties;
+    private final CookieHelper cookieHelper;
 
     public LoginController(LoginService loginService,
                            UserRepository userRepository,
                            RateLimiter rateLimiter,
-                           SecureBankProperties properties) {
+                           CookieHelper cookieHelper) {
         this.loginService = loginService;
         this.userRepository = userRepository;
         this.rateLimiter = rateLimiter;
-        this.properties = properties;
+        this.cookieHelper = cookieHelper;
     }
 
     @PostMapping("/login/start")
@@ -85,7 +82,7 @@ public class LoginController {
                 RequestContext.device(http)
         );
 
-        setRefreshTokenCookie(response, result.refreshToken());
+        cookieHelper.setRefreshTokenCookie(response, result.refreshToken());
 
         UserDto userDto = new UserDto(
                 result.user().getId(),
@@ -111,7 +108,7 @@ public class LoginController {
                 RequestContext.device(http)
         );
 
-        setRefreshTokenCookie(response, result.refreshToken());
+        cookieHelper.setRefreshTokenCookie(response, result.refreshToken());
 
         UserDto userDto = new UserDto(
                 result.user().getId(),
@@ -127,7 +124,7 @@ public class LoginController {
                                                   HttpServletResponse response) {
         String refreshToken = extractRefreshToken(http);
         loginService.logout(refreshToken);
-        clearRefreshTokenCookie(response);
+        cookieHelper.clearRefreshTokenCookie(response);
         return ResponseEntity.ok(new MessageResponse("Logged out successfully."));
     }
 
@@ -156,27 +153,5 @@ public class LoginController {
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);
-    }
-
-    private void setRefreshTokenCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(properties.getJwt().getRefreshTokenTtlDays() * 24L * 60 * 60)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    }
-
-    private void clearRefreshTokenCookie(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

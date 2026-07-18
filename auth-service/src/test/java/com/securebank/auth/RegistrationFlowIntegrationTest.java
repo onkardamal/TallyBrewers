@@ -48,6 +48,9 @@ class RegistrationFlowIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private EmailVerificationRepository emailVerificationRepository;
 
+    @Autowired
+    private com.securebank.auth.config.SecureBankProperties properties;
+
     private static final Pattern TOKEN_PATTERN =
             Pattern.compile("verify-email\\?token=([A-Za-z0-9_-]+)");
 
@@ -139,18 +142,23 @@ class RegistrationFlowIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void resendVerification_isRateLimited() {
-        String email = "erin@example.com";
-        restTemplate.postForEntity("/register",
-                new RegisterRequest("Erin Evans", email, null), MessageResponse.class);
+        properties.getRateLimit().setEnabled(true);
+        try {
+            String email = "erin@example.com";
+            restTemplate.postForEntity("/register",
+                    new RegisterRequest("Erin Evans", email, null), MessageResponse.class);
 
-        ResponseEntity<MessageResponse> first = restTemplate.postForEntity(
-                "/verify-email/resend", new ResendVerificationRequest(email), MessageResponse.class);
-        assertThat(first.getStatusCode()).isEqualTo(HttpStatus.OK);
+            ResponseEntity<MessageResponse> first = restTemplate.postForEntity(
+                    "/verify-email/resend", new ResendVerificationRequest(email), MessageResponse.class);
+            assertThat(first.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        // Immediate second resend within the cooldown window is rejected.
-        ResponseEntity<MessageResponse> second = restTemplate.postForEntity(
-                "/verify-email/resend", new ResendVerificationRequest(email), MessageResponse.class);
-        assertThat(second.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+            // Immediate second resend within the cooldown window is rejected.
+            ResponseEntity<MessageResponse> second = restTemplate.postForEntity(
+                    "/verify-email/resend", new ResendVerificationRequest(email), MessageResponse.class);
+            assertThat(second.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        } finally {
+            properties.getRateLimit().setEnabled(false);
+        }
     }
 
     private String extractTokenFromLatestEmail(String toAddress) throws Exception {

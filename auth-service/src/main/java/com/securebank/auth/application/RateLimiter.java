@@ -17,4 +17,9 @@ public interface RateLimiter {
      *         rate-limited and should be rejected.
      */
     boolean tryAcquire(String key);
+
+    /**
+     * Clear all rate limiter state. Primarily used to reset thresholds during tests.
+     */
+    void reset();
 }

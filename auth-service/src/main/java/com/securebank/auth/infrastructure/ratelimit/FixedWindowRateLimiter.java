@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.securebank.auth.config.SecureBankProperties;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,9 +24,17 @@ public class FixedWindowRateLimiter implements RateLimiter {
     private static final Duration WINDOW = Duration.ofSeconds(60);
 
     private final Map<String, Instant> lastAllowed = new ConcurrentHashMap<>();
+    private final SecureBankProperties properties;
+
+    public FixedWindowRateLimiter(SecureBankProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public boolean tryAcquire(String key) {
+        if (!properties.getRateLimit().isEnabled()) {
+            return true;
+        }
         Instant now = Instant.now();
         // computeIfAbsent-style atomic check-and-set on the window.
         Instant previous = lastAllowed.get(key);
@@ -36,5 +45,10 @@ public class FixedWindowRateLimiter implements RateLimiter {
         // which is acceptable for a throttle of this nature.
         lastAllowed.put(key, now);
         return true;
+    }
+
+    @Override
+    public void reset() {
+        lastAllowed.clear();
     }
 }

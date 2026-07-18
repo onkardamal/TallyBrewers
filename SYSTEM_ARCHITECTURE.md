@@ -1,139 +1,69 @@
 # System Architecture
 
-Frontend
+The SecureBank Passwordless Authentication application is designed as a secure, stateless, and single-node service optimized for standard passwordless login flows.
 
-↓
+---
 
-Authentication API
+## 1. Architectural Component Overview
 
-↓
+```mermaid
+graph TD
+    subgraph Client Tier [Client Tier]
+        Browser[User Browser]
+        ReactSPA[React Frontend SPA - Vite/TS]
+    end
 
-Authentication Service
+    subgraph Service Tier [Backend Service - Spring Boot 3.x]
+        Controllers[API Layer - Controllers / DTOs]
+        Services[Application Layer - Use Case Services]
+        Security[Security Layer - Spring Security / JWT Filter]
+        Domain[Domain Layer - Entities / Domain Rules]
+        Infrastructure[Infrastructure Layer - Persistence, Email, WebAuthn]
+    end
 
-↓
+    subgraph External & Storage Tier [External & Storage Tier]
+        PostgreSQL[(PostgreSQL 17 Database)]
+        SMTP[SMTP Server / Mailpit Catcher]
+    end
 
-Session Service
+    Browser -->|Serves Static Assets| ReactSPA
+    Browser -->|HTTPS API Requests| Controllers
+    Controllers -->|Authentication & Handshakes| Security
+    Security -->|JWT Verification / Context| Services
+    Services -->|Domain Models| Domain
+    Services -->|Contracts & Repository Interfaces| Infrastructure
+    Infrastructure -->|JPA/JDBC| PostgreSQL
+    Infrastructure -->|SMTP Protocol| SMTP
+```
 
-↓
+---
 
-Database
+## 2. Package Structure (Clean Architecture Pattern)
 
-Database Tables
+The backend code is organized under `auth-service/src/main/java/com/securebank/auth/` according to DDD / Clean Architecture principles:
 
-users
+- **`api/`**: REST Controllers. They map routes, parse input validation constraints, extract IP/User-Agent metadata, and return DTO responses. Business logic is strictly delegated to services.
+  - `dto/`: Request/Response payload records.
+- **`application/`**: Use-case orchestrators. Services like `RegistrationService`, `LoginService`, and `RecoveryService` coordinate multi-step transactions.
+- **`domain/`**: Entities (e.g. `User`, `Session`, `Passkey`, `EmailVerification`, `AuditLog`) and core invariant logic.
+- **`infrastructure/`**: Details and integrations. Includes JPA implementations of repository contracts, the JWT generator (`JwtTokenProvider`), SMTP email client (`SmtpEmailSender`), and WebAuthn authenticators.
+- **`security/`**: Integration with Spring Security, such as filters (`JwtAuthenticationFilter`) and principal representations (`UserPrincipal`).
+- **`config/`**: System setup beans. Configures CORs, CSRF cookie/attribute mapping, WebAuthn RelyingParty settings, and Swagger UI.
 
-passkeys
+---
 
-sessions
+## 3. WebAuthn Integration Architecture
 
-recovery_codes
+- **Library**: Yubico WebAuthn Core (`com.yubico:webauthn-server-core`).
+- **RelyingParty Bean**: Instantiated from configuration values (`WEBAUTHN_RP_ID`, `WEBAUTHN_RP_NAME`, `WEBAUTHN_ORIGIN`). Supports multiple comma-separated origins.
+- **Ceremony Challenge Store**: To avoid storing stateful challenges in the HTTP session (allowing stateless backend replication), challenges are managed via a `ChallengeStore<T>` contract. 
+  - `InMemoryChallengeStore` enforces a 5-minute TTL and single-use validation. In a horizontally scaled cluster, this can be swapped with a Redis-backed implementation.
+- **Opaque User Handle**: To protect against user enumeration or PII leakage inside WebAuthn assertion/attestation payloads, a stable random UUID (`webauthn_user_handle`) is generated for each user and sent to the browser instead of their numeric primary key or email.
 
-email_verifications
+---
 
-audit_logs
+## 4. Session & JWT Architecture
 
-No additional services.
-
-No microservices.
-
-Single clean backend.
-
-## Backend package structure (Clean Architecture)
-
-auth-service/src/main/java/com/securebank/auth/
-
-- api/            REST controllers (thin, no business logic)
-- application/     Services orchestrating use cases (registration, login, recovery, sessions)
-- domain/          Entities and core domain logic
-- infrastructure/  Persistence (JPA repositories), WebAuthn integration, JWT signing, email sending
-- security/        Spring Security building blocks (filters, WebAuthn glue)
-- config/          Spring Boot configuration (SecurityConfig, typed properties)
-
-Database schema is owned exclusively by Flyway migrations
-(src/main/resources/db/migration). Hibernate/JPA never auto-generates
-or alters schema (`ddl-auto: validate`).
-
-## Frontend structure
-
-frontend/src/
-
-- pages/       One component per screen in the auth flow (Login, Register,
-  VerifyEmail, PasskeySetup, RecoveryCodes, Recover, Dashboard)
-- components/  Shared/reusable UI components
-- api/         HTTP client and API request functions
-
-Login is the first screen (route "/"), per UI_GUIDELINES.md.
-Styling uses TailwindCSS utility classes exclusively.
-
-## Local development stack (Phase 1)
-
-- Backend: Spring Boot 3.5.16, Java 21, Maven (via Maven Wrapper)
-- Database: PostgreSQL 17, local instance, dedicated `securebank_app` role
-  (not superuser) owns the `securebank` database
-- Frontend: React 19 + TypeScript, Vite, TailwindCSS v4, react-router-dom
-- Email: Spring Mail (SMTP), abstracted behind an interface for later
-  provider swaps (SendGrid, AWS SES, etc.)
-- WebAuthn Relying Party ID/origin: configurable via application
-  properties, defaults to localhost for development
-
-## Phase 2 building blocks
-
-WebAuthn (passkey registration):
-
-- Library: Yubico java-webauthn-server (`com.yubico:webauthn-server-core`
-  2.9.0). Performs all real attestation verification.
-- `RelyingParty` bean built from configuration (RP id / name / origin), so
-  dev→prod is a config change only.
-- `JpaCredentialRepository` adapts our persistence layer to the library's
-  `CredentialRepository` interface.
-- Registration is a two-step ceremony: `/passkey/register/start` (begin) and
-  `/passkey/register` (finish). The pending challenge is held server-side
-  behind the `ChallengeStore` interface — never trusted from the client.
-  - `ChallengeStore<T>` interface (infrastructure/webauthn) with an in-memory,
-    single-node implementation (`InMemoryChallengeStore`, 5-min TTL,
-    single-use). Swap for Redis in a scaled deployment without touching
-    business logic.
-- Stable opaque WebAuthn user handle: a random UUID stored on the user
-  (`users.webauthn_user_handle`, Flyway V2), used as WebAuthn `user.id`
-  instead of the numeric PK or the email.
-
-Email:
-
-- `EmailSender` interface (application) with an SMTP implementation
-  (`SmtpEmailSender`, infrastructure/email). Verification links are built from
-  a configurable frontend base URL.
-
-Cryptography:
-
-- Email verification tokens: high-entropy random tokens, stored as SHA-256
-  hashes (`TokenHasher`). Raw token only ever leaves via email.
-- Recovery codes: cryptographically random, stored as BCrypt hashes
-  (`RecoveryCodeService`), shown in plaintext exactly once.
-
-Rate limiting:
-
-- `RateLimiter` interface (application) with an in-memory fixed-window
-  implementation (`FixedWindowRateLimiter`, infrastructure/ratelimit). Applied
-  to `/verify-email/resend` (1 per 60s per email).
-
-Audit logging:
-
-- `AuditService` records security-relevant events to `audit_logs`.
-
-Cross-cutting API concerns:
-
-- `GlobalExceptionHandler` maps application/validation errors to safe,
-  generic HTTP responses (no internal detail, no account enumeration).
-
-## Testing approach (Phase 2)
-
-- Integration tests run against a REAL PostgreSQL 17 engine and a REAL
-  in-process SMTP server (GreenMail) — no H2, no mocked mail.
-- WebAuthn is tested with a REAL software authenticator (genuine EC P-256
-  keys + CBOR/COSE encoding) so the Yubico library performs actual
-  cryptographic verification. There is no mocked/bypassed authentication.
-- Provisioning note: Testcontainers was the original plan, but Docker is not
-  installed on this development machine, so integration tests use a dedicated
-  `securebank_test` database on the local PostgreSQL instance instead. This
-  preserves the "real database engine" guarantee. Testcontainers dependencies
-  remain in the POM for CI environments that provide Docker.
+SecureBank implements a stateless access/stateful refresh token pattern:
+- **Access Token**: Short-lived (15 min) JWT access token containing subject (email), name, and user ID. Sent in the `Authorization: Bearer <token>` header, verified state-free by `JwtAuthenticationFilter`, and stored **strictly in-memory** on the frontend (no `localStorage`).
+- **Refresh Token**: Long-lived (30 days) cryptographically secure random token, hashed using SHA-256 before database storage (`sessions` table). Returned as an HTTP-only, Secure, SameSite=Lax cookie (`refresh_token`). Rotating refresh tokens are issued upon every `/session/refresh` request, automatically invalidating the old token.

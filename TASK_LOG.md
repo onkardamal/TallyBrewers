@@ -224,3 +224,32 @@ Docs:
   rotating refresh token in HttpOnly cookie) and wiring the Login screen.
 - Later: session refresh/logout, recovery flow (+ its UI), broaden rate
   limiting, enforce CSRF once auth cookies exist.
+
+
+## Day 4 — Phase 3: Login, Session Management, Account Recovery & Frontend Integration
+
+Implemented and fully integrated all authentication, session management, and recovery components.
+
+- **WebAuthn Login**: Completed assertion handshakes (`/login/start` and `/login/verify`) using the Yubico WebAuthn server library, verified on the frontend using browser credentials API.
+- **Session Lifecycles & Refresh Rotation**: Implemented short-lived JWT access tokens stored in-memory on the client, and stateful rotating refresh tokens in secure HttpOnly cookies. Replay attacks are automatically caught by database tracking, causing session revocation.
+- **Account Recovery Flow**: Out-of-band recovery triggered via email links. Handled email validation and verification of hashed recovery codes (via BCrypt) to re-register passkey credentials.
+- **Frontend Wiring**: Completed API client wiring, automated session refresh axios interceptors, and built Login, Dashboard, and Recovery interfaces.
+
+## Day 5 — Phase 4: Production Readiness, Security Review & Testcontainers Migration
+
+Performed extensive security audits, code refactoring, database indexing, and migrated the integration test environment to Testcontainers.
+
+- **Code Quality Refactor**: Extracted ResponseCookie logic into a shared `CookieHelper` component to clean up controllers.
+- **JWT Signature Hardening**: Required `issuer` and `audience` checks during JWT verification.
+- **Registration Rate Limiting**: Added `RateLimiter` checks to registration endpoints.
+- **Scheduled Database Cleanup**: Created Flyway migration `V4__add_expiry_indexes.sql` to index `expires_at` columns, and implemented an hourly background scheduler to delete expired sessions and tokens.
+- **OpenAPI Documentation**: Integrated Springdoc OpenAPI and configured Swagger UI at `/swagger-ui/index.html`.
+- **Frontend Usability**: Added buttons to copy recovery codes and download them as a `.txt` file.
+- **Testcontainers Migration**: Replaced the local PostgreSQL test database dependency with containerized PostgreSQL Testcontainers (`postgres:17-alpine`). Overrode Spring configuration properties dynamically via `@DynamicPropertySource` in `AbstractIntegrationTest.java`. All 13 integration tests run and pass successfully against the containerized database.
+- **Documentation**: Overwrote and updated `README.md`, `SYSTEM_ARCHITECTURE.md`, `DATA_FLOW.md`, `API.md`, `DATABASE.md`, `SECURITY.md` and created `DEPLOYMENT.md` and `CHANGELOG.md`.
+
+## Problems & Solutions
+- **Rate Limit Test Conflicts**: The rate-limiting configuration was causing tests with rapid consecutive requests to fail. Implemented a `securebank.rate-limit.enabled` property, defaulting to `false` in `application-test.yml`, and dynamically enabled it in the specific rate-limiting test case.
+
+## Pending Tasks
+- None. Project is 100% complete and fully verified.

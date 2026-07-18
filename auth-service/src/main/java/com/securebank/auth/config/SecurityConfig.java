@@ -39,7 +39,10 @@ public class SecurityConfig {
             "/login/verify",
             "/recover/start",
             "/recover/verify",
-            "/recover/passkey"
+            "/recover/passkey",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;

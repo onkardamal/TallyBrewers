@@ -20,6 +20,7 @@ export default function RecoveryCodes() {
   const navigate = useNavigate()
   const codes = (location.state as RecoveryState | null)?.recoveryCodes ?? []
   const [acknowledged, setAcknowledged] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   if (codes.length === 0) {
     return (
@@ -31,6 +32,23 @@ export default function RecoveryCodes() {
         <Button onClick={() => navigate('/')}>Go to sign in</Button>
       </AuthLayout>
     )
+  }
+
+  function handleCopy() {
+    navigator.clipboard.writeText(codes.join('\n')).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 3000)
+    })
+  }
+
+  function handleDownload() {
+    const element = document.createElement('a')
+    const file = new Blob([codes.join('\n')], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = 'securebank-recovery-codes.txt'
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
   }
 
   function handleContinue() {
@@ -45,22 +63,32 @@ export default function RecoveryCodes() {
     >
       <ul className="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-800">
         {codes.map((code) => (
-          <li key={code} className="text-center">
+          <li key={code} className="text-center font-semibold tracking-wider">
             {code}
           </li>
         ))}
       </ul>
-      <label className="mb-4 flex items-start gap-2 text-left text-sm text-gray-600">
+
+      <div className="mb-6 flex gap-3">
+        <Button onClick={handleCopy} variant="secondary" className="flex-1 py-2 text-xs">
+          {copied ? '✓ Copied' : 'Copy to Clipboard'}
+        </Button>
+        <Button onClick={handleDownload} variant="secondary" className="flex-1 py-2 text-xs">
+          Download as .TXT
+        </Button>
+      </div>
+
+      <label className="mb-6 flex items-start gap-2.5 text-left text-sm text-gray-600 cursor-pointer select-none">
         <input
           type="checkbox"
           checked={acknowledged}
           onChange={(e) => setAcknowledged(e.target.checked)}
-          className="mt-0.5"
+          className="mt-1 h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
         />
-        <span>I have saved my recovery codes in a safe place.</span>
+        <span>I have securely saved my recovery codes in a safe place.</span>
       </label>
       <Button onClick={handleContinue} disabled={!acknowledged}>
-        Continue
+        Continue to Dashboard
       </Button>
     </AuthLayout>
   )

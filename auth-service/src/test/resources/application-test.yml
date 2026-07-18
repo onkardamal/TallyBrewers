@@ -40,6 +40,8 @@ spring:
             enable: false
 
 securebank:
+  rate-limit:
+    enabled: false
   webauthn:
     relying-party-id: localhost
     relying-party-name: SecureBank Test

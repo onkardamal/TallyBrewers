@@ -6,14 +6,11 @@ import com.securebank.auth.application.RateLimiter;
 import com.securebank.auth.application.RecoveryService;
 import com.securebank.auth.application.RecoveryService.RecoveryCompleteResult;
 import com.securebank.auth.application.RecoveryService.RecoveryVerifyResponse;
-import com.securebank.auth.config.SecureBankProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,14 +43,14 @@ public class RecoveryController {
 
     private final RecoveryService recoveryService;
     private final RateLimiter rateLimiter;
-    private final SecureBankProperties properties;
+    private final CookieHelper cookieHelper;
 
     public RecoveryController(RecoveryService recoveryService,
                               RateLimiter rateLimiter,
-                              SecureBankProperties properties) {
+                              CookieHelper cookieHelper) {
         this.recoveryService = recoveryService;
         this.rateLimiter = rateLimiter;
-        this.properties = properties;
+        this.cookieHelper = cookieHelper;
     }
 
     @PostMapping("/recover/start")
@@ -103,19 +100,8 @@ public class RecoveryController {
                 RequestContext.device(http)
         );
 
-        setRefreshTokenCookie(response, result.refreshToken());
+        cookieHelper.setRefreshTokenCookie(response, result.refreshToken());
 
         return ResponseEntity.ok(new RecoveryCompleteResponse(result.accessToken(), result.recoveryCodes()));
-    }
-
-    private void setRefreshTokenCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(properties.getJwt().getRefreshTokenTtlDays() * 24L * 60 * 60)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

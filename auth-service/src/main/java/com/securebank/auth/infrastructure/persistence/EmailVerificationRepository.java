@@ -20,4 +20,8 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
     @Modifying
     @Query("DELETE FROM EmailVerification ev WHERE ev.userId = :userId AND ev.verified = false")
     void deleteUnverifiedByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("DELETE FROM EmailVerification ev WHERE ev.expiresAt < :now")
+    int deleteExpiredTokens(@Param("now") java.time.Instant now);
 }

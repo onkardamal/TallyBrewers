@@ -22,6 +22,9 @@ public class SecureBankProperties {
     @NestedConfigurationProperty
     private final Mail mail = new Mail();
 
+    @NestedConfigurationProperty
+    private final RateLimit rateLimit = new RateLimit();
+
     public WebAuthn getWebauthn() {
         return webauthn;
     }
@@ -32,6 +35,22 @@ public class SecureBankProperties {
 
     public Mail getMail() {
         return mail;
+    }
+
+    public RateLimit getRateLimit() {
+        return rateLimit;
+    }
+
+    public static class RateLimit {
+        private boolean enabled = true;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
     }
 
     public static class WebAuthn {
@@ -71,6 +90,8 @@ public class SecureBankProperties {
         private String secret;
         private int accessTokenTtlMinutes;
         private int refreshTokenTtlDays;
+        private String issuer;
+        private String audience;
 
         public String getSecret() {
             return secret;
@@ -94,6 +115,22 @@ public class SecureBankProperties {
 
         public void setRefreshTokenTtlDays(int refreshTokenTtlDays) {
             this.refreshTokenTtlDays = refreshTokenTtlDays;
+        }
+
+        public String getIssuer() {
+            return issuer;
+        }
+
+        public void setIssuer(String issuer) {
+            this.issuer = issuer;
+        }
+
+        public String getAudience() {
+            return audience;
+        }
+
+        public void setAudience(String audience) {
+            this.audience = audience;
         }
     }
 

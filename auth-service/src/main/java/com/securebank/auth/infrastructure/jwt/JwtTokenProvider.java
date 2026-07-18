@@ -25,7 +25,10 @@ public class JwtTokenProvider {
             throw new IllegalArgumentException("JWT Secret key cannot be null or empty.");
         }
         this.algorithm = Algorithm.HMAC256(secret);
-        this.verifier = JWT.require(algorithm).build();
+        this.verifier = JWT.require(algorithm)
+                .withIssuer(properties.getJwt().getIssuer())
+                .withAudience(properties.getJwt().getAudience())
+                .build();
     }
 
     /**
@@ -42,6 +45,8 @@ public class JwtTokenProvider {
 
         return JWT.create()
                 .withSubject(email)
+                .withIssuer(properties.getJwt().getIssuer())
+                .withAudience(properties.getJwt().getAudience())
                 .withClaim("userId", userId)
                 .withClaim("name", name)
                 .withIssuedAt(now)

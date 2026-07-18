@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -336,9 +335,6 @@ class LoginAndRecoveryFlowIntegrationTest extends AbstractIntegrationTest {
         return headers;
     }
     private void resetRateLimiter() {
-        Map<?, ?> lastAllowed = (Map<?, ?>) ReflectionTestUtils.getField(rateLimiter, "lastAllowed");
-        if (lastAllowed != null) {
-            lastAllowed.clear();
-        }
+        rateLimiter.reset();
     }
 }
