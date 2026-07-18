@@ -1,0 +1,57 @@
+# Test configuration.
+#
+# Integration tests run against a REAL local PostgreSQL 17 instance (a
+# dedicated `securebank_test` database), not an in-memory substitute, so
+# Flyway migrations and JPA mappings are exercised against the production
+# database engine. SMTP points at an in-process GreenMail server.
+#
+# (Testcontainers dependencies remain available in the POM for CI environments
+# that provide a Docker daemon; the local-instance approach is used here
+# because Docker is not installed on this development machine.)
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${TEST_DB_HOST:localhost}:${TEST_DB_PORT:5432}/${TEST_DB_NAME:securebank_test}
+    username: ${TEST_DB_USERNAME:securebank_app}
+    # Reuses the gitignored .env DB_PASSWORD; no secret is committed here.
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    clean-disabled: false
+    locations: classpath:db/migration
+
+  mail:
+    host: 127.0.0.1
+    port: 3025
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+securebank:
+  webauthn:
+    relying-party-id: localhost
+    relying-party-name: SecureBank Test
+    origin: https://localhost:5173
+  jwt:
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 30
+  mail:
+    from-address: no-reply@securebank.local
+    verification-url-base: https://localhost:5173/verify-email
+
+logging:
+  level:
+    root: WARN
+    com.securebank.auth: INFO
