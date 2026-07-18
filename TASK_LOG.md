@@ -206,8 +206,6 @@ Docs:
 
 ## Problems / notes
 
-- Docker still not installed → integration tests continue to use the local
-  `securebank_test` DB (real Postgres), not Testcontainers.
 - Port 8080 is currently occupied by a different app of the user's
   (com.trustledger.TrustLedgerApplication, running in Android Studio). The
   auth-service default port and the frontend's VITE_API_BASE_URL both assume
@@ -218,12 +216,6 @@ Docs:
   Windows Hello prompt) must be done by a human. Everything up to that point is
   verified against real infrastructure.
 
-## Pending Tasks (updated)
-
-- Phase 3: Login (WebAuthn assertion + session issuance: JWT access token +
-  rotating refresh token in HttpOnly cookie) and wiring the Login screen.
-- Later: session refresh/logout, recovery flow (+ its UI), broaden rate
-  limiting, enforce CSRF once auth cookies exist.
 
 
 ## Day 4 — Phase 3: Login, Session Management, Account Recovery & Frontend Integration

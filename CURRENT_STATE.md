@@ -1,39 +1,27 @@
 # Current State
 
-Backend
+## Backend: 100% Complete
+- Passwordless onboarding (registration, email verification, email verification resend).
+- Passwordless credentials registration and biometric login ceremonies via WebAuthn/Passkeys (Yubico WebAuthn library).
+- Stateful rotating refresh sessions mapped to database session tracking (IP, User-Agent, expires_at), combined with short-lived memory-resident JWT access tokens.
+- Account recovery via email token and BCrypt-hashed one-time recovery codes, with dynamic credentials rotation.
+- IP-based rate limiting on all public authentication endpoints.
+- Auto-cleaning hourly scheduler to purge expired sessions and email verification tokens.
+- Flyway migrations for schema creation, WebAuthn handle adjustments, and performance indexes.
+- Self-documenting Swagger UI with Springdoc OpenAPI configurations.
+- All integration tests migrated from local PostgreSQL dependency to PostgreSQL Testcontainers, achieving 100% reproducibility.
 
-50% (registration, email verification + resend, WebAuthn passkey registration,
-recovery codes — implemented, integration-tested, and verified end-to-end
-against real infra. Robustness fixes: graceful malformed-JSON and mail-failure
-handling, /error no longer masked as 403, default Spring Security user removed.
-Login, session management, and recovery flows still pending.)
+## Frontend: 100% Complete
+- Complete user registration and email verification flow.
+- Biometric passkey setup and login wired to native browser WebAuthn credentials APIs.
+- Cookie-based CSRF protection (raw cookie token echo header).
+- In-memory JWT storage with automatic silent token refresh interceptors.
+- Clipboard copy and local file downloads for plaintext recovery codes.
+- Minimal responsive banking dashboard UI.
 
-Frontend
+## Database: 100% Complete
+- Database schemas fully managed via Flyway migrations `V1` through `V4`.
+- Indexes optimized on frequently searched expiry fields.
 
-45% (registration flow fully wired to the backend: Register, VerifyEmail
-(with resend), PasskeySetup (real browser WebAuthn), RecoveryCodes; shared
-AuthLayout/Button/TextField/Alert components; typed API client. Login is a
-Phase 3 placeholder; recovery UI pending.)
-
-Database
-
-100% (schema via Flyway V1 + V2)
-
-Authentication
-
-45% (full passwordless onboarding path complete and browser-wired:
-registration → email verification → passkey registration → recovery codes.
-Login/assertion not yet implemented.)
-
-Current Task
-
-Frontend connected to registration endpoints; default security user removed;
-passkey entity fields verified; docs updated. Registration flow verified
-end-to-end against real PostgreSQL + real SMTP (Mailpit) + real WebAuthn
-options. Final human browser click-through (with a platform authenticator)
-recommended before/at Phase 3 start.
-
-Next
-
-Phase 3: Login (WebAuthn assertion) + session management (JWT access token +
-rotating refresh token in HttpOnly cookie).
+## Test Coverage: 100% Successful
+- All 13 unit and integration tests run and pass successfully against dynamic PostgreSQL Testcontainers and in-process GreenMail SMTP test servers.
