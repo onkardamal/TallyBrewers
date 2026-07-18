@@ -10,4 +10,6 @@ public interface RecoveryCodeRepository extends JpaRepository<RecoveryCode, Long
     List<RecoveryCode> findByUserId(Long userId);
 
     boolean existsByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }

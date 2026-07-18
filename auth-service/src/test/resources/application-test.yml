@@ -45,6 +45,7 @@ securebank:
     relying-party-name: SecureBank Test
     origin: https://localhost:5173
   jwt:
+    secret: df882d921b36be9f2a9db26e95c102a0a2df362c8e001cf4b63810f279149021
     access-token-ttl-minutes: 15
     refresh-token-ttl-days: 30
   mail:
@@ -55,3 +56,4 @@ logging:
   level:
     root: WARN
     com.securebank.auth: INFO
+    org.springframework.security: DEBUG

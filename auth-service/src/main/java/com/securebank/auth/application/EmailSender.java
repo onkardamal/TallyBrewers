@@ -14,4 +14,10 @@ public interface EmailSender {
      * raw (unhashed) verification token.
      */
     void sendVerificationEmail(String toAddress, String recipientName, String verificationToken);
+
+    /**
+     * Send an account recovery email containing a link with the given
+     * raw (unhashed) verification token.
+     */
+    void sendRecoveryEmail(String toAddress, String recipientName, String recoveryToken);
 }

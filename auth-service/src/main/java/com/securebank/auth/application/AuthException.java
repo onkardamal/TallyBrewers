@@ -35,4 +35,8 @@ public class AuthException extends RuntimeException {
     public static AuthException notFound(String message) {
         return new AuthException(HttpStatus.NOT_FOUND, message);
     }
+
+    public static AuthException unauthorized(String message) {
+        return new AuthException(HttpStatus.UNAUTHORIZED, message);
+    }
 }

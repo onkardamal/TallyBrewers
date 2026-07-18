@@ -75,6 +75,13 @@
             <version>2.9.0</version>
         </dependency>
 
+        <!-- JWT for stateless sessions -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
         <!-- Configuration metadata (application.yml autocomplete) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

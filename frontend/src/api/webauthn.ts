@@ -15,6 +15,9 @@ interface PublicKeyCredentialStaticJson {
   parseCreationOptionsFromJSON(
     options: unknown,
   ): PublicKeyCredentialCreationOptions
+  parseRequestOptionsFromJSON(
+    options: unknown,
+  ): PublicKeyCredentialRequestOptions
 }
 
 interface CredentialWithToJson extends Credential {
@@ -28,7 +31,10 @@ export function isWebAuthnSupported(): boolean {
     typeof window.PublicKeyCredential !== 'undefined' &&
     typeof (
       window.PublicKeyCredential as unknown as PublicKeyCredentialStaticJson
-    ).parseCreationOptionsFromJSON === 'function'
+    ).parseCreationOptionsFromJSON === 'function' &&
+    typeof (
+      window.PublicKeyCredential as unknown as PublicKeyCredentialStaticJson
+    ).parseRequestOptionsFromJSON === 'function'
   )
 }
 
@@ -60,6 +66,38 @@ export async function createPasskey(creationOptions: {
 
   if (!credential) {
     throw new Error('Passkey creation was cancelled.')
+  }
+
+  return credential.toJSON()
+}
+
+/**
+ * Run navigator.credentials.get() for the given server-issued assertion request
+ * options JSON and return the assertion credential as a JSON-serializable object.
+ *
+ * @param assertionOptions the `{ publicKey: {...} }` or raw assertion options object
+ */
+export async function getPasskey(assertionOptions: {
+  publicKey: unknown
+}): Promise<unknown> {
+  if (!isWebAuthnSupported()) {
+    throw new Error(
+      'This browser does not support passkeys. Please use an up-to-date browser.',
+    )
+  }
+
+  const staticApi =
+    window.PublicKeyCredential as unknown as PublicKeyCredentialStaticJson
+  const publicKey = staticApi.parseRequestOptionsFromJSON(
+    assertionOptions.publicKey,
+  )
+
+  const credential = (await navigator.credentials.get({
+    publicKey,
+  })) as CredentialWithToJson | null
+
+  if (!credential) {
+    throw new Error('Passkey assertion was cancelled.')
   }
 
   return credential.toJSON()

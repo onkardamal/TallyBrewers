@@ -47,6 +47,7 @@ securebank:
     relying-party-name: ${WEBAUTHN_RP_NAME:SecureBank}
     origin: ${WEBAUTHN_ORIGIN:http://localhost:5173}
   jwt:
+    secret: ${JWT_SECRET:df882d921b36be9f2a9db26e95c102a0a2df362c8e001cf4b63810f279149021}
     access-token-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:15}
     refresh-token-ttl-days: ${JWT_REFRESH_TTL_DAYS:30}
   mail:

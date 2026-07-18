@@ -49,4 +49,29 @@ public class SmtpEmailSender implements EmailSender {
 
         mailSender.send(message);
     }
+
+    @Override
+    public void sendRecoveryEmail(String toAddress, String recipientName, String recoveryToken) {
+        String base = properties.getMail().getVerificationUrlBase();
+        String recoveryBase = base.endsWith("/verify-email") ? base.replace("/verify-email", "/recover") : base + "/recover";
+        String link = recoveryBase
+                + "?token="
+                + URLEncoder.encode(recoveryToken, StandardCharsets.UTF_8)
+                + "&email="
+                + URLEncoder.encode(toAddress, StandardCharsets.UTF_8);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(properties.getMail().getFromAddress());
+        message.setTo(toAddress);
+        message.setSubject("Recover your SecureBank account");
+        message.setText(
+                "Hi " + recipientName + ",\n\n"
+                        + "You requested to recover your SecureBank account. "
+                        + "Please use the link below to verify your email and enter your recovery code:\n\n"
+                        + link + "\n\n"
+                        + "This link expires in 24 hours. If you did not request account recovery, "
+                        + "you can safely ignore this email.\n");
+
+        mailSender.send(message);
+    }
 }

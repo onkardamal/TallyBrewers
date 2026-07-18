@@ -1,5 +1,6 @@
 package com.securebank.auth.config;
 
+import com.securebank.auth.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,6 +9,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,52 +23,72 @@ import java.util.List;
  * no traditional Spring Security {@code UserDetailsService}. Authentication
  * is performed via WebAuthn passkeys and results in the issuance of a JWT
  * access token plus a rotating refresh token stored in an HttpOnly cookie.
- *
- * Responsibilities so far:
- * - Disable Spring Security's default form login / HTTP Basic (not used).
- * - Force stateless sessions (no server-side session state; the JWT and the
- *   refresh-token cookie together are the source of truth for authentication).
- * - Enable CSRF protection for cookie-based requests.
- * - Configure a restrictive CORS policy scoped to the frontend origin.
- *
- * Phase 2 endpoints (registration, email verification, passkey registration)
- * are public bootstrap endpoints reached before any authenticated session
- * exists. They are permitted without authentication and exempted from CSRF:
- * CSRF attacks rely on ambient credentials (session cookies), and there are
- * none of those yet. Once login introduces refresh-token cookies (Phase 6),
- * authenticated endpoints will enforce CSRF.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /** Public, unauthenticated bootstrap endpoints. */
+    /** Public, unauthenticated bootstrap endpoints that do not use cookies. */
     private static final String[] PUBLIC_ENDPOINTS = {
             "/register",
             "/verify-email",
             "/verify-email/resend",
             "/passkey/register/start",
             "/passkey/register",
+            "/login/start",
+            "/login/verify",
+            "/recover/start",
+            "/recover/verify",
+            "/recover/passkey"
     };
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler requestHandler =
+                new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler();
+        // By setting requestAttributeName to null, we defer loading of the CSRF token,
+        // but still use the non-XOR handler.
+        requestHandler.setCsrfRequestAttributeName(null);
+
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(
                                 org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(requestHandler)
                         .ignoringRequestMatchers(PUBLIC_ENDPOINTS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        // Allow the error dispatch so failures surface with their
-                        // real status (e.g. 400 for malformed JSON) instead of
-                        // being masked as 403 by the authenticated() fallback.
+                        // /session/refresh and /logout are cookie-based public endpoints but need to be accessible
+                        .requestMatchers("/session/refresh", "/logout").permitAll()
+                        // Allow the error dispatch so failures surface with their real status
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin.disable())
-                .httpBasic(httpBasic -> httpBasic.disable());
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .logout(logout -> logout.disable())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new org.springframework.web.filter.OncePerRequestFilter() {
+                    @Override
+                    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request,
+                                                    jakarta.servlet.http.HttpServletResponse response,
+                                                    jakarta.servlet.FilterChain filterChain)
+                            throws jakarta.servlet.ServletException, java.io.IOException {
+                        org.springframework.security.web.csrf.CsrfToken csrfToken =
+                                (org.springframework.security.web.csrf.CsrfToken) request.getAttribute(org.springframework.security.web.csrf.CsrfToken.class.getName());
+                        if (csrfToken != null) {
+                            csrfToken.getToken();
+                        }
+                        filterChain.doFilter(request, response);
+                    }
+                }, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -76,7 +98,8 @@ public class SecurityConfig {
         // Frontend origin during development; overridden via configuration in production.
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+        configuration.setExposedHeaders(List.of("Set-Cookie"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -86,9 +109,7 @@ public class SecurityConfig {
 
     /**
      * General-purpose cryptographic hasher, reused for hashing recovery codes
-     * and email verification tokens before they are persisted. SecureBank
-     * never stores user login passwords, so this bean is not part of a
-     * username/password authentication flow.
+     * and email verification tokens before they are persisted.
      */
     @Bean
     public PasswordEncoder passwordEncoder() {

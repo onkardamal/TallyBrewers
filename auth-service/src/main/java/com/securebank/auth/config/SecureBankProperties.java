@@ -68,8 +68,17 @@ public class SecureBankProperties {
     }
 
     public static class Jwt {
+        private String secret;
         private int accessTokenTtlMinutes;
         private int refreshTokenTtlDays;
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
 
         public int getAccessTokenTtlMinutes() {
             return accessTokenTtlMinutes;

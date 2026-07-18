@@ -37,6 +37,7 @@ public final class TestSoftwareAuthenticator {
 
     private final KeyPair keyPair;
     private final byte[] credentialId;
+    private byte[] userHandle;
 
     public TestSoftwareAuthenticator() {
         try {
@@ -48,6 +49,101 @@ public final class TestSoftwareAuthenticator {
         } catch (Exception e) {
             throw new IllegalStateException("Failed to initialize test authenticator", e);
         }
+    }
+
+    public TestSoftwareAuthenticator(KeyPair keyPair, byte[] credentialId) {
+        this.keyPair = keyPair;
+        this.credentialId = credentialId;
+    }
+
+    public TestSoftwareAuthenticator(KeyPair keyPair, byte[] credentialId, byte[] userHandle) {
+        this.keyPair = keyPair;
+        this.credentialId = credentialId;
+        this.userHandle = userHandle;
+    }
+
+    public byte[] getUserHandle() {
+        return userHandle;
+    }
+
+    public KeyPair getKeyPair() {
+        return keyPair;
+    }
+
+    public byte[] getCredentialId() {
+        return credentialId;
+    }
+
+    /**
+     * Produce an assertion (login) response JSON for the given
+     * PublicKeyCredentialRequestOptions JSON (as returned by the server's
+     * /login/start endpoint).
+     */
+    public String createAssertionResponse(String assertionOptionsJson, String origin) {
+        try {
+            ObjectNode root = (ObjectNode) MAPPER.readTree(assertionOptionsJson);
+            ObjectNode publicKey = (ObjectNode) root.get("publicKey");
+            String challengeB64 = publicKey.get("challenge").asText();
+            String rpId = publicKey.get("rpId").asText();
+
+            byte[] clientDataJson = buildAssertionClientDataJson(challengeB64, origin);
+            byte[] authData = buildAssertionAuthenticatorData(rpId);
+
+            // Compute signature over: authData || sha256(clientDataJson)
+            byte[] clientDataJsonHash = sha256(clientDataJson);
+            ByteArrayOutputStream signatureInput = new ByteArrayOutputStream();
+            signatureInput.write(authData);
+            signatureInput.write(clientDataJsonHash);
+
+            java.security.Signature signature = java.security.Signature.getInstance("SHA256withECDSA");
+            signature.initSign(keyPair.getPrivate());
+            signature.update(signatureInput.toByteArray());
+            byte[] signatureBytes = signature.sign();
+
+            ObjectNode response = MAPPER.createObjectNode();
+            response.put("clientDataJSON", B64URL.encodeToString(clientDataJson));
+            response.put("authenticatorData", B64URL.encodeToString(authData));
+            response.put("signature", B64URL.encodeToString(signatureBytes));
+            if (userHandle != null) {
+                response.put("userHandle", B64URL.encodeToString(userHandle));
+            } else {
+                response.put("userHandle", "");
+            }
+
+            ObjectNode credential = MAPPER.createObjectNode();
+            String credIdB64 = B64URL.encodeToString(credentialId);
+            credential.put("type", "public-key");
+            credential.put("id", credIdB64);
+            credential.put("rawId", credIdB64);
+            credential.set("response", response);
+            credential.set("clientExtensionResults", MAPPER.createObjectNode());
+
+            return MAPPER.writeValueAsString(credential);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to build assertion response", e);
+        }
+    }
+
+    private byte[] buildAssertionClientDataJson(String challengeB64, String origin) throws Exception {
+        String normalizedChallenge = B64URL.encodeToString(B64URL_DEC.decode(challengeB64));
+        ObjectNode clientData = MAPPER.createObjectNode();
+        clientData.put("type", "webauthn.get");
+        clientData.put("challenge", normalizedChallenge);
+        clientData.put("origin", origin);
+        clientData.put("crossOrigin", false);
+        return MAPPER.writeValueAsBytes(clientData);
+    }
+
+    private byte[] buildAssertionAuthenticatorData(String rpId) throws Exception {
+        byte[] rpIdHash = sha256(rpId.getBytes(StandardCharsets.UTF_8));
+        // Flags: UP (0x01) | UV (0x04)
+        byte flags = (byte) (0x01 | 0x04);
+        byte[] signCount = new byte[] {0, 0, 0, 1};
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(rpIdHash);
+        out.write(flags);
+        out.write(signCount);
+        return out.toByteArray();
     }
 
     /**
@@ -62,6 +158,11 @@ public final class TestSoftwareAuthenticator {
             ObjectNode publicKey = (ObjectNode) root.get("publicKey");
             String challengeB64 = publicKey.get("challenge").asText();
             String rpId = publicKey.get("rp").get("id").asText();
+
+            ObjectNode userNode = (ObjectNode) publicKey.get("user");
+            if (userNode != null && userNode.has("id")) {
+                this.userHandle = B64URL_DEC.decode(userNode.get("id").asText());
+            }
 
             byte[] clientDataJson = buildClientDataJson(challengeB64, origin);
             byte[] authData = buildAuthenticatorData(rpId);

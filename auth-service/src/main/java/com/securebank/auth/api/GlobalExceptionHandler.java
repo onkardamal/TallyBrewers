@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<MessageResponse> handleAuthException(AuthException ex) {
+        log.info("AuthException caught: {}", ex.getMessage());
         return ResponseEntity.status(ex.getStatus()).body(new MessageResponse(ex.getMessage()));
     }
 
