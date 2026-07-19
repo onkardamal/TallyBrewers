@@ -6,6 +6,8 @@ import PasskeySetup from './pages/PasskeySetup'
 import RecoveryCodes from './pages/RecoveryCodes'
 import Recover from './pages/Recover'
 import Dashboard from './pages/Dashboard'
+import QrLogin from './pages/QrLogin'
+import Approve from './pages/Approve'
 
 /**
  * Route structure follows the authentication flow documented in
@@ -27,6 +29,8 @@ function App() {
         <Route path="/passkey-setup" element={<PasskeySetup />} />
         <Route path="/recovery-codes" element={<RecoveryCodes />} />
         <Route path="/recover" element={<Recover />} />
+        <Route path="/qr-login" element={<QrLogin />} />
+        <Route path="/approve" element={<Approve />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>

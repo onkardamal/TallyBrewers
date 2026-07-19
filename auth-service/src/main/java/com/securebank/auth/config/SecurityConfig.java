@@ -37,6 +37,9 @@ public class SecurityConfig {
             "/passkey/register",
             "/login/start",
             "/login/verify",
+            "/login/step-up",
+            "/login/qr/start",
+            "/login/qr/status",
             "/recover/start",
             "/recover/verify",
             "/recover/passkey",
@@ -65,6 +68,29 @@ public class SecurityConfig {
                                 org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(requestHandler)
                         .ignoringRequestMatchers(PUBLIC_ENDPOINTS))
+                // Network-security hardening: send defensive HTTP response headers
+                // on every API response.
+                .headers(headers -> headers
+                        // Clickjacking: this API is never meant to be framed.
+                        .frameOptions(frame -> frame.deny())
+                        // MIME-sniffing protection.
+                        .contentTypeOptions(withDefaults -> {})
+                        // Force HTTPS for a year once served over TLS (ignored on plain-http localhost).
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
+                        // Don't leak full URLs (which may carry tokens) in the Referer header.
+                        .referrerPolicy(ref -> ref.policy(
+                                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        // Lock down what the API's own responses may do/load.
+                        // Permits the bundled Swagger UI while blocking framing,
+                        // object embeds, and off-origin resource loads.
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; frame-ancestors 'none'; base-uri 'self'; "
+                                        + "object-src 'none'; script-src 'self' 'unsafe-inline'; "
+                                        + "style-src 'self' 'unsafe-inline'; img-src 'self' data:"))
+                        .addHeaderWriter(new org.springframework.security.web.header.writers.StaticHeadersWriter(
+                                "Permissions-Policy", "geolocation=(), camera=(), microphone=(), payment=()")))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

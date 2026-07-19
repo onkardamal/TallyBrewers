@@ -1,1 +1,95 @@
 @import "tailwindcss";
+
+/*
+ * SecureBank design system.
+ * Tailwind v4 CSS-first theme: these tokens generate utilities like
+ * `bg-brand-600`, `text-accent-500`, `font-sans`, etc.
+ */
+@theme {
+  /* Brand — deep, trustworthy navy/indigo */
+  --color-brand-50: #eef1fb;
+  --color-brand-100: #dbe1f6;
+  --color-brand-200: #b9c5ee;
+  --color-brand-300: #8fa1e2;
+  --color-brand-400: #6076d2;
+  --color-brand-500: #3f54bf;
+  --color-brand-600: #2f3fa0;
+  --color-brand-700: #263283;
+  --color-brand-800: #1c2660;
+  --color-brand-900: #131a44;
+  --color-brand-950: #0a0e29;
+
+  /* Accent — refined emerald (security / trust / growth) */
+  --color-accent-300: #6ee7b7;
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+  --color-accent-700: #047857;
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+
+  --radius-xl2: 1.25rem;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    font-family: var(--font-sans);
+  }
+}
+
+/* Subtle, reusable motion primitives for the auth surfaces. */
+@keyframes sb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sb-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes sb-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.sb-rise {
+  animation: sb-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.sb-pulse-ring {
+  animation: sb-pulse-ring 2s ease-out infinite;
+}
+.sb-float {
+  animation: sb-float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-rise,
+  .sb-pulse-ring,
+  .sb-float {
+    animation: none;
+  }
+}
