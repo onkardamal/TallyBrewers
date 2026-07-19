@@ -43,10 +43,6 @@ public class SecureBankProperties {
 
     public static class RateLimit {
         private boolean enabled = true;
-        /** Max requests allowed per key within the window. */
-        private int maxRequests = 10;
-        /** Length of the fixed window, in seconds. */
-        private int windowSeconds = 60;
 
         public boolean isEnabled() {
             return enabled;
@@ -54,22 +50,6 @@ public class SecureBankProperties {
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
-        }
-
-        public int getMaxRequests() {
-            return maxRequests;
-        }
-
-        public void setMaxRequests(int maxRequests) {
-            this.maxRequests = maxRequests;
-        }
-
-        public int getWindowSeconds() {
-            return windowSeconds;
-        }
-
-        public void setWindowSeconds(int windowSeconds) {
-            this.windowSeconds = windowSeconds;
         }
     }
 

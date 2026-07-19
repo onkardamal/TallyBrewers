@@ -1,7 +1,7 @@
 /**
  * Typed API functions for the SecureBank authentication service.
  */
-import { postJson, getJson, request } from './client'
+import { postJson, getJson } from './client'
 
 export interface MessageResponse {
   message: string
@@ -71,62 +71,11 @@ export function loginStart(email: string): Promise<LoginStartResponse> {
   return postJson<LoginStartResponse>('/login/start', { email })
 }
 
-export interface LoginVerifyResponse {
-  stepUpRequired: boolean
-  stepUpHandle: string | null
-  accessToken: string | null
-  user: UserDto | null
-}
-
 export function loginVerify(
   handle: string,
   credential: unknown,
-): Promise<LoginVerifyResponse> {
-  return postJson<LoginVerifyResponse>('/login/verify', { handle, credential })
-}
-
-/** Complete a new-device step-up by submitting the emailed one-time code. */
-export function loginStepUp(handle: string, code: string): Promise<LoginResponse> {
-  return postJson<LoginResponse>('/login/step-up', { handle, code })
-}
-
-// ── Cross-device (QR "scan to sign in") login ──────────────────────────────
-
-export interface QrStartResponse {
-  linkId: string
-  desktopToken: string
-  expiresInSeconds: number
-}
-
-export interface QrStatusResponse {
-  status: 'PENDING' | 'APPROVED' | 'EXPIRED' | 'CONSUMED'
-  accessToken: string | null
-  user: UserDto | null
-}
-
-/** Desktop: begin a QR login and receive the link id + secret device token. */
-export function qrStart(): Promise<QrStartResponse> {
-  return postJson<QrStartResponse>('/login/qr/start')
-}
-
-/** Desktop: poll for approval; on APPROVED the session (cookie + token) is issued. */
-export function qrStatus(linkId: string, desktopToken: string): Promise<QrStatusResponse> {
-  const params = new URLSearchParams({ linkId, desktopToken })
-  return getJson<QrStatusResponse>(`/login/qr/status?${params.toString()}`)
-}
-
-/** Phone (authenticated): begin the passkey re-auth needed to approve. */
-export function qrApproveStart(): Promise<LoginStartResponse> {
-  return postJson<LoginStartResponse>('/login/qr/approve/start')
-}
-
-/** Phone (authenticated): approve a desktop sign-in with a fresh passkey signature. */
-export function qrApprove(
-  linkId: string,
-  handle: string,
-  credential: unknown,
-): Promise<MessageResponse> {
-  return postJson<MessageResponse>('/login/qr/approve', { linkId, handle, credential })
+): Promise<LoginResponse> {
+  return postJson<LoginResponse>('/login/verify', { handle, credential })
 }
 
 export function logout(): Promise<MessageResponse> {
@@ -171,24 +120,4 @@ export function completeRecovery(
     handle,
     credential,
   })
-}
-
-export interface SessionDto {
-  id: number
-  ipAddress?: string
-  userAgent?: string
-  createdAt: string
-  lastActivity: string
-  expiresAt: string
-  current: boolean
-}
-
-/** List the signed-in user's active sessions (real, persisted session data). */
-export function listSessions(): Promise<SessionDto[]> {
-  return getJson<SessionDto[]>('/sessions')
-}
-
-/** Remotely sign a device out by revoking its session. */
-export function revokeSession(id: number): Promise<MessageResponse> {
-  return request<MessageResponse>(`/sessions/${id}`, { method: 'DELETE' })
 }

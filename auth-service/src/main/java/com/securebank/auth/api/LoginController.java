@@ -36,13 +36,6 @@ public class LoginController {
     public record LoginResponse(String accessToken, UserDto user) {
     }
 
-    public record LoginVerifyResponse(boolean stepUpRequired, String stepUpHandle,
-                                      String accessToken, UserDto user) {
-    }
-
-    public record StepUpRequest(@NotBlank String handle, @NotBlank String code) {
-    }
-
     public record UserDto(Long id, String name, String email, String phone) {
     }
 
@@ -74,53 +67,17 @@ public class LoginController {
     }
 
     @PostMapping("/login/verify")
-    public ResponseEntity<LoginVerifyResponse> loginVerify(@Valid @RequestBody LoginVerifyRequest request,
-                                                           HttpServletRequest http,
-                                                           HttpServletResponse response) {
+    public ResponseEntity<LoginResponse> loginVerify(@Valid @RequestBody LoginVerifyRequest request,
+                                                     HttpServletRequest http,
+                                                     HttpServletResponse response) {
         String ip = RequestContext.clientIp(http);
         if (!rateLimiter.tryAcquire("login-verify:" + ip)) {
             throw AuthException.tooManyRequests("Too many requests. Please try again later.");
         }
 
-        LoginService.VerifyOutcome outcome = loginService.verify(
+        LoginResult result = loginService.verify(
                 request.handle(),
                 request.credential().toString(),
-                ip,
-                RequestContext.device(http)
-        );
-
-        // New device: passkey verified, but session is withheld until the
-        // emailed step-up code is confirmed. No refresh cookie is issued yet.
-        if (outcome.stepUpRequired()) {
-            return ResponseEntity.ok(
-                    new LoginVerifyResponse(true, outcome.stepUpHandle(), null, null));
-        }
-
-        LoginResult result = outcome.login();
-        cookieHelper.setRefreshTokenCookie(response, result.refreshToken());
-
-        UserDto userDto = new UserDto(
-                result.user().getId(),
-                result.user().getName(),
-                result.user().getEmail(),
-                result.user().getPhone()
-        );
-        return ResponseEntity.ok(
-                new LoginVerifyResponse(false, null, result.accessToken(), userDto));
-    }
-
-    @PostMapping("/login/step-up")
-    public ResponseEntity<LoginResponse> loginStepUp(@Valid @RequestBody StepUpRequest request,
-                                                     HttpServletRequest http,
-                                                     HttpServletResponse response) {
-        String ip = RequestContext.clientIp(http);
-        if (!rateLimiter.tryAcquire("login-step-up:" + ip)) {
-            throw AuthException.tooManyRequests("Too many requests. Please try again later.");
-        }
-
-        LoginResult result = loginService.completeStepUp(
-                request.handle(),
-                request.code(),
                 ip,
                 RequestContext.device(http)
         );

@@ -73,20 +73,6 @@ async function performRefresh(): Promise<string> {
   }
 }
 
-/**
- * Attempt to restore an access token from the HttpOnly refresh cookie (e.g.
- * after a full page reload, where the in-memory access token is gone).
- * Returns true if a session was restored. Never throws.
- */
-export async function tryRestoreSession(): Promise<boolean> {
-  try {
-    await performRefresh()
-    return true
-  } catch {
-    return false
-  }
-}
-
 export async function request<TResponse>(
   path: string,
   options: RequestInit = {}
