@@ -187,25 +187,6 @@ export default function Login() {
         </Button>
       </form>
 
-      <div className="my-5 flex items-center gap-3 text-xs text-gray-400">
-        <span className="h-px flex-1 bg-gray-200" />
-        or
-        <span className="h-px flex-1 bg-gray-200" />
-      </div>
-
-      <Link to="/qr-login">
-        <Button variant="secondary" icon={
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
-            <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
-            <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
-            <path d="M14 14h3m4 0v.01M14 21h7m-3-4v4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-          </svg>
-        }>
-          Sign in with your phone
-        </Button>
-      </Link>
-
       <div className="mt-5 flex items-center justify-center gap-2 text-xs text-gray-400">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />

@@ -51,6 +51,7 @@ export default function Register() {
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
+          disabled={loading}
         />
         <TextField
           label="Email"
@@ -60,6 +61,7 @@ export default function Register() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={loading}
         />
         <TextField
           label="Phone (optional)"
@@ -68,6 +70,7 @@ export default function Register() {
           autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          disabled={loading}
         />
         <Button type="submit" loading={loading}>
           Create account

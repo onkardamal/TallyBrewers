@@ -321,7 +321,7 @@ public class LoginService {
     public LoginResult createSessionForUser(User user, String ipAddress, String userAgent) {
         String rawRefreshToken = tokenHasher.generateToken();
         String hash = tokenHasher.hash(rawRefreshToken);
-        Instant expiresAt = Instant.now().plus(properties.getJwt().getRefreshTokenTtlDays(), ChronoUnit.DAYS);
+        Instant expiresAt = Instant.now().plus(properties.getJwt().getRefreshTokenTtlMinutes(), ChronoUnit.MINUTES);
 
         Session session = new Session(user.getId(), hash, ipAddress, userAgent, expiresAt);
         sessionRepository.save(session);

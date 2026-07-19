@@ -36,10 +36,11 @@ export default function TextField({
         )}
         <input
           id={fieldId}
-          className={`w-full rounded-xl border border-gray-200 bg-white py-3 text-sm
-            text-brand-950 placeholder-gray-400 shadow-sm transition
-            focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25
-            ${icon ? 'pl-11 pr-3.5' : 'px-3.5'} ${className}`}
+          className={`w-full rounded-2xl border border-gray-200 bg-gray-50/50 py-3.5 text-sm
+            text-brand-950 placeholder-gray-400 transition-all duration-200
+            focus:border-brand-900 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-900/10
+            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
+            ${icon ? 'pl-11 pr-4' : 'px-4'} ${className}`}
           {...rest}
         />
       </div>

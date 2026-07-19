@@ -36,19 +36,12 @@ export default function AuthLayout({
   footer,
 }: AuthLayoutProps) {
   return (
-    <main className="flex min-h-screen bg-white">
+    <main className="flex min-h-screen bg-gray-50/30">
       {/* Brand / trust panel */}
-      <aside className="relative hidden w-[46%] shrink-0 overflow-hidden bg-brand-950 lg:flex lg:flex-col">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-90"
-          style={{
-            background:
-              'radial-gradient(120% 80% at 15% 10%, #263283 0%, rgba(38,50,131,0) 55%), radial-gradient(90% 70% at 90% 90%, #10b981 0%, rgba(16,185,129,0) 45%), linear-gradient(160deg, #131a44 0%, #0a0e29 100%)',
-          }}
-        />
+      <aside className="relative hidden w-[46%] shrink-0 overflow-hidden sb-mesh-gradient lg:flex lg:flex-col">
         {/* Decorative grid + glow */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage:
               'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
@@ -60,12 +53,12 @@ export default function AuthLayout({
           <Brand size={40} withWordmark variant="light" />
 
           <div className="max-w-md">
-            <h2 className="text-3xl font-semibold leading-tight text-white">
+            <h2 className="font-display text-4xl font-semibold leading-tight text-white">
               Banking security,
               <br />
               without the password.
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-brand-200">
+            <p className="mt-4 text-sm leading-relaxed text-slate-300">
               SecureBank replaces the weakest link in banking — the password —
               with passkeys built into your devices.
             </p>
@@ -73,7 +66,7 @@ export default function AuthLayout({
             <ul className="mt-10 space-y-6">
               {TRUST_POINTS.map((p) => (
                 <li key={p.title} className="flex gap-4">
-                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10">
                     <svg
                       width="18"
                       height="18"
@@ -83,7 +76,7 @@ export default function AuthLayout({
                     >
                       <path
                         d="M20 6L9 17l-5-5"
-                        stroke="#34d399"
+                        stroke="#10b981"
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -92,7 +85,7 @@ export default function AuthLayout({
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-white">{p.title}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-brand-200">
+                    <p className="mt-1 text-sm leading-relaxed text-slate-400">
                       {p.body}
                     </p>
                   </div>
@@ -101,7 +94,7 @@ export default function AuthLayout({
             </ul>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-brand-300">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M12 2l7 3v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V5l7-3z"
@@ -116,19 +109,19 @@ export default function AuthLayout({
       </aside>
 
       {/* Auth surface */}
-      <section className="flex flex-1 items-center justify-center px-5 py-10 sm:px-8">
-        <div className="w-full max-w-sm sb-rise">
+      <section className="flex flex-1 items-center justify-center bg-gray-50/50 px-5 py-12 sm:px-8">
+        <div className="w-full max-w-md rounded-3xl bg-white p-8 sm:p-10 sb-premium-border sb-premium-shadow sb-rise">
           {/* Compact brand header (mobile only) */}
           <div className="mb-8 flex justify-center lg:hidden">
-            <Brand size={36} withWordmark />
+            <Brand size={32} withWordmark />
           </div>
 
-          <div className="mb-7">
-            <h1 className="text-2xl font-semibold tracking-tight text-brand-950">
+          <div className="mb-6 text-left">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-brand-900 sm:text-3xl">
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-2 text-sm leading-relaxed text-gray-500">
+              <p className="mt-2 text-sm leading-relaxed text-brand-500">
                 {subtitle}
               </p>
             )}
@@ -136,7 +129,7 @@ export default function AuthLayout({
 
           {children}
 
-          {footer && <div className="mt-6">{footer}</div>}
+          {footer && <div className="mt-6 border-t border-gray-100 pt-6">{footer}</div>}
         </div>
       </section>
     </main>

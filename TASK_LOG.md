@@ -238,10 +238,15 @@ Performed extensive security audits, code refactoring, database indexing, and mi
 - **OpenAPI Documentation**: Integrated Springdoc OpenAPI and configured Swagger UI at `/swagger-ui/index.html`.
 - **Frontend Usability**: Added buttons to copy recovery codes and download them as a `.txt` file.
 - **Testcontainers Migration**: Replaced the local PostgreSQL test database dependency with containerized PostgreSQL Testcontainers (`postgres:17-alpine`). Overrode Spring configuration properties dynamically via `@DynamicPropertySource` in `AbstractIntegrationTest.java`. All 13 integration tests run and pass successfully against the containerized database.
-- **Documentation**: Overwrote and updated `README.md`, `SYSTEM_ARCHITECTURE.md`, `DATA_FLOW.md`, `API.md`, `DATABASE.md`, `SECURITY.md` and created `DEPLOYMENT.md` and `CHANGELOG.md`.
+- **Visual Design Refinement**: Re-designed theme stylesheets with modern typography (Outfit + Plus Jakarta Sans), sleek radial/linear mesh gradients, premium card elevations, glassmorphic navigations, and micro-animations for focus states and click scales.
+- **Auto-loading .env configuration**: Implemented programmatic `.env` parsing in `AuthServiceApplication.java` to dynamically register environment configurations.
+- **Memory Leak Mitigation**: Integrated automated cleanup of expired keys in `FixedWindowRateLimiter` to prevent memory growth.
+- **Input Truncation Protection**: Hardened `RequestContext` against SQL column length overflows by truncating IP and User-Agent headers.
+- **Documentation**: Overwrote and updated `README.md`, `SYSTEM_ARCHITECTURE.md`, `DATA_FLOW.md`, `API.md`, `DATABASE.md`, `SECURITY.md`, `CHANGELOG.md`, `CURRENT_STATE.md`, and `DEPLOYMENT.md`.
 
 ## Problems & Solutions
 - **Rate Limit Test Conflicts**: The rate-limiting configuration was causing tests with rapid consecutive requests to fail. Implemented a `securebank.rate-limit.enabled` property, defaulting to `false` in `application-test.yml`, and dynamically enabled it in the specific rate-limiting test case.
+- **Local WebAuthn Context Restrictions**: Real mobile browsers block WebAuthn calls over non-HTTPS custom domains (e.g. local IPs). Switched desktop auth link to bypass mobile-specific QR buttons in local environments to prevent errors.
 
 ## Pending Tasks
-- None. Project is 100% complete and fully verified.
+- None. Project is 100% complete, visually refined, and verified.

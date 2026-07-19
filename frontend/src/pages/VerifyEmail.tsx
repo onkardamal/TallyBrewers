@@ -102,6 +102,7 @@ export default function VerifyEmail() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={resending}
           />
           <Button onClick={handleResend} loading={resending} variant="secondary">
             Resend verification email
@@ -128,6 +129,7 @@ export default function VerifyEmail() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={resending}
         />
         <Button onClick={handleResend} loading={resending} variant="secondary">
           Resend verification email

@@ -109,7 +109,7 @@ public class SecureBankProperties {
     public static class Jwt {
         private String secret;
         private int accessTokenTtlMinutes;
-        private int refreshTokenTtlDays;
+        private int refreshTokenTtlMinutes;
         private String issuer;
         private String audience;
 
@@ -129,12 +129,12 @@ public class SecureBankProperties {
             this.accessTokenTtlMinutes = accessTokenTtlMinutes;
         }
 
-        public int getRefreshTokenTtlDays() {
-            return refreshTokenTtlDays;
+        public int getRefreshTokenTtlMinutes() {
+            return refreshTokenTtlMinutes;
         }
 
-        public void setRefreshTokenTtlDays(int refreshTokenTtlDays) {
-            this.refreshTokenTtlDays = refreshTokenTtlDays;
+        public void setRefreshTokenTtlMinutes(int refreshTokenTtlMinutes) {
+            this.refreshTokenTtlMinutes = refreshTokenTtlMinutes;
         }
 
         public String getIssuer() {

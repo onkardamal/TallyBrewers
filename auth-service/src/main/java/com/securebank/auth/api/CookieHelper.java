@@ -27,7 +27,7 @@ public class CookieHelper {
                 .secure(true)
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(properties.getJwt().getRefreshTokenTtlDays() * 24L * 60 * 60)
+                .maxAge(properties.getJwt().getRefreshTokenTtlMinutes() * 60L)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
