@@ -74,4 +74,22 @@ public class SmtpEmailSender implements EmailSender {
 
         mailSender.send(message);
     }
+
+    @Override
+    public void sendStepUpCode(String toAddress, String recipientName, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(properties.getMail().getFromAddress());
+        message.setTo(toAddress);
+        message.setSubject("Your SecureBank verification code: " + code);
+        message.setText(
+                "Hi " + recipientName + ",\n\n"
+                        + "We noticed a sign-in to your SecureBank account from a new device. "
+                        + "To confirm it's you, enter this verification code:\n\n"
+                        + "    " + code + "\n\n"
+                        + "This code expires in 10 minutes. If this wasn't you, do not enter the "
+                        + "code — your account remains protected by your passkey, and you should "
+                        + "review your active devices.\n");
+
+        mailSender.send(message);
+    }
 }

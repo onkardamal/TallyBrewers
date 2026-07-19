@@ -8,6 +8,7 @@ import { passkeyRegisterFinish, passkeyRegisterStart } from '../api/auth'
 import { ApiError } from '../api/client'
 import { createPasskey, isWebAuthnSupported } from '../api/webauthn'
 import { getPendingEmail } from '../api/pendingRegistration'
+import SecurityWalkthrough from '../components/SecurityWalkthrough'
 
 /**
  * Passkey setup screen. Runs the real WebAuthn registration ceremony:
@@ -59,6 +60,9 @@ export default function PasskeySetup() {
         />
       )}
       {error && <Alert kind="error" message={error} />}
+      <div className="mb-5">
+        <SecurityWalkthrough />
+      </div>
       <div className="space-y-4">
         <TextField
           label="Email"
