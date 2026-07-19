@@ -143,6 +143,8 @@ class RegistrationFlowIntegrationTest extends AbstractIntegrationTest {
     @Test
     void resendVerification_isRateLimited() {
         properties.getRateLimit().setEnabled(true);
+        int originalMaxRequests = properties.getRateLimit().getMaxRequests();
+        properties.getRateLimit().setMaxRequests(1);
         try {
             String email = "erin@example.com";
             restTemplate.postForEntity("/register",
@@ -157,6 +159,7 @@ class RegistrationFlowIntegrationTest extends AbstractIntegrationTest {
                     "/verify-email/resend", new ResendVerificationRequest(email), MessageResponse.class);
             assertThat(second.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
         } finally {
+            properties.getRateLimit().setMaxRequests(originalMaxRequests);
             properties.getRateLimit().setEnabled(false);
         }
     }

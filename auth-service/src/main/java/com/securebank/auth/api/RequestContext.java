@@ -13,14 +13,24 @@ final class RequestContext {
 
     static String clientIp(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
+        String ip;
         if (forwarded != null && !forwarded.isBlank()) {
             // First entry is the original client.
-            return forwarded.split(",")[0].trim();
+            ip = forwarded.split(",")[0].trim();
+        } else {
+            ip = request.getRemoteAddr();
         }
-        return request.getRemoteAddr();
+        if (ip != null && ip.length() > 45) {
+            return ip.substring(0, 45);
+        }
+        return ip;
     }
 
     static String device(HttpServletRequest request) {
-        return request.getHeader("User-Agent");
+        String ua = request.getHeader("User-Agent");
+        if (ua != null && ua.length() > 255) {
+            return ua.substring(0, 255);
+        }
+        return ua;
     }
 }

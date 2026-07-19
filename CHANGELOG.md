@@ -12,6 +12,10 @@ All notable changes to the SecureBank Passwordless Authentication project are do
 - **Expiry Indexes**: Added Flyway migration `V4__add_expiry_indexes.sql` to optimize purge queries by indexing `expires_at` columns.
 - **Frontend Polish**: Added "Copy to Clipboard" and "Download as .TXT" utility buttons to the `RecoveryCodes.tsx` screen to make saving recovery codes easy and safe.
 - **Deployment Documentation**: Created `DEPLOYMENT.md` providing cloud deployment steps for Railway, Vercel, and Neon.
+- **Aesthetic Refinement (Apple/Google Style)**: Configured Outfit & Plus Jakarta Sans typography, visual mesh gradients, custom animation transitions, and glassmorphic card layouts.
+- **Auto-loading .env configurations**: Configured `AuthServiceApplication.java` to load and inject `.env` properties dynamically on startup from IDEs/CLI.
+- **Memory Leak Fixes**: Added active cleanup of expired `FixedWindowRateLimiter` keys to prevent memory bloat.
+- **Input Hardening**: Prevented SQL column truncation exceptions in `RequestContext` by truncating long headers.
 
 ### Refactored
 - **Centralized Cookie Helper**: Extracted duplicate `refresh_token` ResponseCookie logic from `LoginController` and `RecoveryController` into `CookieHelper.java`.

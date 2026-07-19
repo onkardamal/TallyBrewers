@@ -39,6 +39,10 @@ public class FixedWindowRateLimiter implements RateLimiter {
         Instant now = Instant.now();
         Duration windowLength = Duration.ofSeconds(config.getWindowSeconds());
 
+        if (windows.size() > 100) {
+            windows.entrySet().removeIf(e -> now.isAfter(e.getValue().start.plus(windowLength)));
+        }
+
         // Atomically start a new window or increment the current one.
         Window updated = windows.compute(key, (k, existing) -> {
             if (existing == null || now.isAfter(existing.start.plus(windowLength))) {

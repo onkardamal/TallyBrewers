@@ -18,6 +18,7 @@
 - In-memory JWT storage with automatic silent token refresh interceptors.
 - Clipboard copy and local file downloads for plaintext recovery codes.
 - Minimal responsive banking dashboard UI.
+- Premium design system featuring custom typography (Outfit + Plus Jakarta Sans), mesh gradients, micro-animations, and glassmorphic card layouts.
 
 ## Database: 100% Complete
 - Database schemas fully managed via Flyway migrations `V1` through `V4`.
