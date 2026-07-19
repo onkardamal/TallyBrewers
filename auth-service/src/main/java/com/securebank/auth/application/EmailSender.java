@@ -20,4 +20,10 @@ public interface EmailSender {
      * raw (unhashed) verification token.
      */
     void sendRecoveryEmail(String toAddress, String recipientName, String recoveryToken);
+
+    /**
+     * Send a step-up verification email containing a one-time code, used to
+     * confirm a login from a device the account has not seen before.
+     */
+    void sendStepUpCode(String toAddress, String recipientName, String code);
 }
