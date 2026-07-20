@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import Alert from '../components/Alert'
 import Button from '../components/Button'
@@ -29,6 +29,8 @@ const PasskeyIcon = (
 )
 
 export default function Login() {
+  const location = useLocation()
+  const [showLoggedOut, setShowLoggedOut] = useState(!!location.state?.loggedOut)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -175,11 +177,15 @@ export default function Login() {
           placeholder="you@example.com"
           autoComplete="username webauthn"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value)
+            setShowLoggedOut(false)
+          }}
           disabled={loading}
           icon={MailIcon}
         />
 
+        {showLoggedOut && <Alert kind="success" message="You have been signed out successfully." />}
         {error && <Alert kind="error" message={error} />}
 
         <Button type="submit" loading={loading} icon={PasskeyIcon}>

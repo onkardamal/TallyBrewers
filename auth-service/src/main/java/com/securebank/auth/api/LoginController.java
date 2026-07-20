@@ -168,7 +168,7 @@ public class LoginController {
         String refreshToken = extractRefreshToken(http);
         loginService.logout(refreshToken);
         cookieHelper.clearRefreshTokenCookie(response);
-        return ResponseEntity.ok(new MessageResponse("Logged out successfully."));
+        return ResponseEntity.ok(new MessageResponse("You have been signed out successfully."));
     }
 
     @GetMapping("/me")

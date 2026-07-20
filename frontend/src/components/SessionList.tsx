@@ -120,7 +120,7 @@ export default function SessionList() {
                   disabled={revoking === s.id}
                   className="shrink-0 rounded-xl border border-rose-100 bg-white px-3.5 py-2 text-xs font-semibold text-rose-600 transition duration-150 hover:bg-rose-50 hover:text-rose-700 active:scale-95 disabled:opacity-50"
                 >
-                  {revoking === s.id ? 'Revoking…' : 'Sign out'}
+                  {revoking === s.id ? 'Revoking…' : 'Signed Out'}
                 </button>
               )}
             </li>

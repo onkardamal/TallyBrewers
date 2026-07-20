@@ -32,7 +32,7 @@ export default function Dashboard() {
       // Ignore network errors on logout
     } finally {
       setAccessToken(null)
-      navigate('/')
+      navigate('/', { state: { loggedOut: true } })
     }
   }
 
