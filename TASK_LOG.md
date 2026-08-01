@@ -258,6 +258,7 @@ Performed extensive security audits, code refactoring, database indexing, and mi
 - **Orchestrated Sandbox (Docker Compose)**: Set up a root-level `docker-compose.yml` defining PostgreSQL 17, Mailpit SMTP catcher, backend, and frontend services for easy, repeatable one-click local production validation.
 - **Verifications**: Ran direct local Maven packages (`./mvnw package`) and Vite builds (`npm run build`) successfully. Documented local Docker daemon startup prerequisites.
 - **Architecture Updates**: Updated `SYSTEM_ARCHITECTURE.md`, `CURRENT_STATE.md`, and `TASK_LOG.md`.
+- **Bug Fix (Maven go-offline)**: Removed `dependency:go-offline` step from `auth-service/Dockerfile` since it fails on Railway/CI environments due to resolution constraints.
 
 ## Pending Tasks
 - None. Deployment configurations are 100% complete and verified.

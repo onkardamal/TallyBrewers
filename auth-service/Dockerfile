@@ -8,7 +8,6 @@ COPY mvnw pom.xml ./
 
 # Clean file endings for mvnw in case of Windows hosts, then resolve dependencies
 RUN tr -d '\r' < mvnw > mvnw_unix && mv mvnw_unix mvnw && chmod +x mvnw
-RUN ./mvnw dependency:go-offline
 
 # Copy source code and package
 COPY src ./src
