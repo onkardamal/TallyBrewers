@@ -67,3 +67,14 @@ The backend code is organized under `auth-service/src/main/java/com/securebank/a
 SecureBank implements a stateless access/stateful refresh token pattern:
 - **Access Token**: Short-lived (15 min) JWT access token containing subject (email), name, and user ID. Sent in the `Authorization: Bearer <token>` header, verified state-free by `JwtAuthenticationFilter`, and stored **strictly in-memory** on the frontend (no `localStorage`).
 - **Refresh Token**: Long-lived (30 days) cryptographically secure random token, hashed using SHA-256 before database storage (`sessions` table). Returned as an HTTP-only, Secure, SameSite=Lax cookie (`refresh_token`). Rotating refresh tokens are issued upon every `/session/refresh` request, automatically invalidating the old token.
+
+---
+
+## 5. Deployment & Containerization Architecture
+
+SecureBank is containerized using a multi-stage Docker build process to ensure slim, secure, and production-ready images:
+
+- **Backend Service Container**: Built using `eclipse-temurin:21-jdk-alpine` to compile and package the Spring Boot JAR, and run via `eclipse-temurin:21-jre-alpine` to minimize image size and attack surface.
+- **Frontend Service Container**: Built using `node:20-alpine` to bundle the Vite/React static assets, and served via `nginx:stable-alpine` using a custom routing profile to support client-side React Router navigation.
+- **Local Sandbox (Docker Compose)**: Multi-container sandbox orchestrating `database` (PostgreSQL 17), `mailpit` (SMTP catcher), `backend` service, and `frontend` SPA, replicating production settings locally.
+- **SPA Routing Support**: Custom configurations (`vercel.json` and `nginx.conf`) rewrite all non-file client requests to `index.html` to prevent `404` routing errors on page refresh.

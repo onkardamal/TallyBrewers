@@ -250,3 +250,15 @@ Performed extensive security audits, code refactoring, database indexing, and mi
 
 ## Pending Tasks
 - None. Project is 100% complete, visually refined, and verified.
+
+## Day 6 — Deployment Setup and Containerization
+- **Backend Dockerization**: Added a multi-stage `Dockerfile` (build with `eclipse-temurin:21-jdk-alpine`, run with `eclipse-temurin:21-jre-alpine`) for the Spring Boot service.
+- **Frontend Dockerization**: Added a multi-stage `Dockerfile` (build with `node:20-alpine`, run with `nginx:stable-alpine`) and `nginx.conf` supporting SPA routing redirects.
+- **Vercel Configuration**: Added `vercel.json` rewrite file to prevent client-side routing 404s when direct routing or refreshing links on Vercel.
+- **Orchestrated Sandbox (Docker Compose)**: Set up a root-level `docker-compose.yml` defining PostgreSQL 17, Mailpit SMTP catcher, backend, and frontend services for easy, repeatable one-click local production validation.
+- **Verifications**: Ran direct local Maven packages (`./mvnw package`) and Vite builds (`npm run build`) successfully. Documented local Docker daemon startup prerequisites.
+- **Architecture Updates**: Updated `SYSTEM_ARCHITECTURE.md`, `CURRENT_STATE.md`, and `TASK_LOG.md`.
+
+## Pending Tasks
+- None. Deployment configurations are 100% complete and verified.
+

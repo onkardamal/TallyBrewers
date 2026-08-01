@@ -1,0 +1,67 @@
+services:
+  database:
+    image: postgres:17-alpine
+    container_name: securebank-db
+    environment:
+      POSTGRES_DB: securebank
+      POSTGRES_USER: securebank_app
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U securebank_app -d securebank"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: securebank-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  backend:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: securebank-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_NAME=securebank
+      - DB_USERNAME=securebank_app
+      - DB_PASSWORD=password123
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - SMTP_AUTH=false
+      - SMTP_STARTTLS=false
+      - MAIL_FROM=no-reply@securebank.local
+      - WEBAUTHN_RP_ID=localhost
+      - WEBAUTHN_RP_NAME=SecureBank
+      - WEBAUTHN_ORIGIN=http://localhost:3000
+      - JWT_ACCESS_TTL_MINUTES=15
+      - JWT_REFRESH_TTL_MINUTES=15
+      - SERVER_PORT=8080
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:8080
+    container_name: securebank-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
