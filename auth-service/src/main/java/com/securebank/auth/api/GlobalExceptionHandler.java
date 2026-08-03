@@ -60,4 +60,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new MessageResponse(
                 "We couldn't send the verification email right now. Please try again later."));
     }
+
+    /**
+     * Fallback for any unhandled exception → 500 with a generic message,
+     * rather than a raw stack trace. The underlying exception is logged server-side.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<MessageResponse> handleGenericException(Exception ex) {
+        log.error("Unhandled exception caught", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse(
+                "Something went wrong. Please try again."));
+    }
 }

@@ -37,6 +37,9 @@ spring:
             enable: ${SMTP_STARTTLS:true}
           ssl:
             trust: ${SMTP_HOST:smtp.gmail.com}
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 server:
   port: ${SERVER_PORT:8080}
