@@ -55,7 +55,7 @@ export default function SessionList() {
   }
 
   return (
-    <section className="rounded-3xl bg-white p-6 sb-premium-border sb-premium-shadow">
+    <section className="rounded-2xl sm:rounded-3xl bg-white p-5 sm:p-6 sb-premium-border sb-premium-shadow">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="font-display text-lg font-bold text-slate-900">Where you&apos;re signed in</h2>

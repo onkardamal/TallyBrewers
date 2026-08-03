@@ -109,10 +109,10 @@ export default function AuthLayout({
       </aside>
 
       {/* Auth surface */}
-      <section className="flex flex-1 items-center justify-center bg-gray-50/50 px-5 py-12 sm:px-8">
-        <div className="w-full max-w-md rounded-3xl bg-white p-8 sm:p-10 sb-premium-border sb-premium-shadow sb-rise">
+      <section className="flex flex-1 items-center justify-center bg-gray-50/50 px-4 py-8 sm:px-8 sm:py-12">
+        <div className="w-full max-w-md rounded-2xl bg-white p-6 sm:rounded-3xl sm:p-10 sb-premium-border sb-premium-shadow sb-rise">
           {/* Compact brand header (mobile only) */}
-          <div className="mb-8 flex justify-center lg:hidden">
+          <div className="mb-6 flex justify-center lg:hidden">
             <Brand size={32} withWordmark />
           </div>
 

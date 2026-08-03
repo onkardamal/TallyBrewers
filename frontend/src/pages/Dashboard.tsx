@@ -62,8 +62,8 @@ export default function Dashboard() {
       {error && <p className="mb-4 text-sm text-rose-600">{error}</p>}
 
       {/* Protection reassurance — human language, not a data grid */}
-      <div className="mb-8 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50/50 via-white to-transparent sb-premium-shadow">
-        <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:gap-6">
+      <div className="mb-8 overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50/50 via-white to-transparent sb-premium-shadow">
+        <div className="flex flex-col gap-4 p-5 sm:p-6 sm:flex-row sm:items-center sm:gap-6">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/50">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 2l7 3v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V5l7-3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
@@ -81,7 +81,7 @@ export default function Dashboard() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Account details — simple, human */}
-        <section className="rounded-3xl bg-white p-6 sb-premium-border sb-premium-shadow lg:col-span-1">
+        <section className="rounded-2xl sm:rounded-3xl bg-white p-5 sm:p-6 sb-premium-border sb-premium-shadow lg:col-span-1">
           <h2 className="font-display text-lg font-bold text-slate-900">Your details</h2>
           <dl className="mt-5 space-y-4 text-sm">
             <div className="border-b border-slate-50 pb-3">
