@@ -49,9 +49,11 @@ public class SecurityConfig {
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final SecureBankProperties properties;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, SecureBankProperties properties) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.properties = properties;
     }
 
     @Bean
@@ -124,8 +126,8 @@ public class SecurityConfig {
 
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Frontend origin during development; overridden via configuration in production.
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        // Dynamic allowed origin resolved from securebank.webauthn.origin property.
+        configuration.setAllowedOrigins(List.of(properties.getWebauthn().getOrigin()));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
         configuration.setExposedHeaders(List.of("Set-Cookie"));
