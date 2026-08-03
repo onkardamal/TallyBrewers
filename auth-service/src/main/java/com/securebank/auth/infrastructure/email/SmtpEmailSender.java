@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
  * hard-coded here.
  */
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "securebank.mail.provider", havingValue = "smtp", matchIfMissing = true)
 public class SmtpEmailSender implements EmailSender {
 
     private final JavaMailSender mailSender;

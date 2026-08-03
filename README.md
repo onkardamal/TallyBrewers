@@ -27,6 +27,9 @@ Review the dedicated specifications in this repository for full engineering deta
 - **IP-based Rate Limiting**: All authentication endpoints throttled to 1 request per 60 seconds per IP.
 - **Hourly Purge Scheduler**: Automatic background purge of expired sessions and verification tokens.
 - **OpenAPI Swagger UI**: Self-documenting controllers accessible at `/swagger-ui/index.html`.
+- **Hybrid Mail Sender Subsystem**: Dual-mode transactional email delivery:
+  - **SMTP Mode** (Default): Outbound mail sending using standard SMTP servers (Gmail, Mailtrap, local Mailpit).
+  - **HTTP API Mode**: Direct HTTPS requests via Brevo REST API to bypass firewall-level SMTP port blocking on cloud hosting providers (e.g., Railway, Render).
 
 ---
 
@@ -77,7 +80,8 @@ Review the dedicated specifications in this repository for full engineering deta
 ## 4. Run Test Suite
 
 ### Prerequisites
-- **Docker Desktop** (or any active local Docker daemon) must be running on the developer machine.
+- **PostgreSQL 17** running locally (or in Docker) with a dedicated database called `securebank_test`.
+- The local tests connect using the default credential values of `securebank_app` / `your_local_postgres_password` (customizable via `TEST_DB_PASSWORD` or `TEST_DB_USERNAME`).
 
 ### Run Instructions
 To execute the backend test suite:
@@ -87,10 +91,40 @@ cd auth-service
 ```
 
 ### Expected Startup Behavior
-1. **Docker Container Launch**: The test suite uses **Testcontainers** to orchestrate PostgreSQL automatically. When the tests start, Testcontainers checks for a running Docker daemon and spins up two containers:
-   - `testcontainers/ryuk`: A sidecar container responsible for cleaning up database containers after the test run finishes.
-   - `postgres:17-alpine`: The actual isolated PostgreSQL database container used for execution.
+1. **Docker Container Launch**: The test suite uses **Testcontainers** to orchestrate PostgreSQL automatically if Docker is active. If Docker is not available, it automatically falls back to your local Windows PostgreSQL instance.
 2. **Flyway Migrations**: Flyway runs automatically on startup against this container, executing all migrations (`V1` through `V4`) to prepare the database schema.
 3. **GreenMail**: An in-process GreenMail server is started locally for SMTP assertions.
 4. **Clean State**: Before each test method, the tables are automatically truncated, ensuring completely reproducible, isolated test runs.
 5. **Port mapping**: The dynamic PostgreSQL container maps its port randomly, ensuring no port conflicts with any locally running PostgreSQL instance.
+
+---
+
+## 5. Production Cloud Deployment Config
+
+To connect your **Vercel React Frontend**, **Railway Spring Boot Backend**, and **Neon PostgreSQL Database**, configure the following environment variables on Railway:
+
+| Environment Variable | Description | Recommended Value |
+| --- | --- | --- |
+| **DB_HOST** | Neon DB host domain | `your_neon_db_host` |
+| **DB_PORT** | Database connection port | `5432` |
+| **DB_NAME** | Database schema query string | `neondb?sslmode=require` |
+| **DB_USERNAME** | Database username | `your_neon_db_username` |
+| **DB_PASSWORD** | Neon database user password | `your_neon_db_password` |
+| **SECUREBANK_MAIL_PROVIDER** | Toggle email mode (SMTP or REST) | `brevo-http` |
+| **BREVO_API_KEY** | Brevo v3 REST API Key | `your_brevo_api_key` |
+| **MAIL_FROM** | Verified Brevo sender address | `your_verified_sender_email` |
+| **WEBAUTHN_RP_ID** | Passkey Relying Party Domain ID | `your_vercel_frontend_domain` |
+| **WEBAUTHN_RP_NAME** | App Display Name for Passkeys | `SecureBank` |
+| **WEBAUTHN_ORIGIN** | Allowed Frontend CORS Domain | `https://your_vercel_frontend_domain` |
+| **MAIL_VERIFICATION_URL_BASE** | Frontend email validation path | `https://your_vercel_frontend_domain/verify-email` |
+
+---
+
+## 6. Deployed Environment Reference
+
+The production environment is live and accessible at the following public endpoints:
+
+* **Frontend Client (Vercel)**: [https://securebank-pink.vercel.app](https://securebank-pink.vercel.app)
+* **Backend REST API (Railway)**: [https://tallybrewers-production.up.railway.app](https://tallybrewers-production.up.railway.app)
+* **Database (Neon)**: Host `ep-plain-heart-axgkivhw.c-4.us-east-2.aws.neon.tech` (schema: `neondb`)
+

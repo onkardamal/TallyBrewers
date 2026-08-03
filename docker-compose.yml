@@ -42,6 +42,8 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD:-}
       - SMTP_AUTH=${SMTP_AUTH:-false}
       - SMTP_STARTTLS=${SMTP_STARTTLS:-false}
+      - SECUREBANK_MAIL_PROVIDER=${SECUREBANK_MAIL_PROVIDER:-smtp}
+      - BREVO_API_KEY=${BREVO_API_KEY:-}
       - MAIL_FROM=${MAIL_FROM:-no-reply@securebank.local}
       - WEBAUTHN_RP_ID=localhost
       - WEBAUTHN_RP_NAME=SecureBank

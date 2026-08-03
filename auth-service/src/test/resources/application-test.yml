@@ -13,8 +13,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${TEST_DB_HOST:localhost}:${TEST_DB_PORT:5432}/${TEST_DB_NAME:securebank_test}
     username: ${TEST_DB_USERNAME:securebank_app}
-    # Reuses the gitignored .env DB_PASSWORD; no secret is committed here.
-    password: ${DB_PASSWORD:}
+    password: ${TEST_DB_PASSWORD:Onkar@2005}
     driver-class-name: org.postgresql.Driver
 
   jpa:
