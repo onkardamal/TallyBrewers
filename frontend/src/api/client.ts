@@ -1,14 +1,15 @@
 /**
  * Base HTTP client for the SecureBank authentication API.
- * Connected to live backend at https://95b337a59a75ea.lhr.life
+ * Connected to live backend at https://emptiness-obsessive-busily.ngrok-free.dev
  */
 
 export const API_BASE_URL: string =
   import.meta.env.VITE_API_BASE_URL &&
   !import.meta.env.VITE_API_BASE_URL.includes('railway') &&
-  !import.meta.env.VITE_API_BASE_URL.includes('render')
+  !import.meta.env.VITE_API_BASE_URL.includes('render') &&
+  !import.meta.env.VITE_API_BASE_URL.includes('lhr.life')
     ? import.meta.env.VITE_API_BASE_URL
-    : 'https://95b337a59a75ea.lhr.life'
+    : 'https://emptiness-obsessive-busily.ngrok-free.dev'
 
 /** Error carrying the backend's HTTP status and message. */
 export class ApiError extends Error {
@@ -59,6 +60,7 @@ async function performRefresh(): Promise<string> {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
         ...(csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {}),
       },
     })
@@ -97,6 +99,9 @@ export async function request<TResponse>(
   options: RequestInit = {}
 ): Promise<TResponse> {
   const headers = new Headers(options.headers)
+  if (!headers.has('ngrok-skip-browser-warning')) {
+    headers.set('ngrok-skip-browser-warning', 'true')
+  }
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`)
   }

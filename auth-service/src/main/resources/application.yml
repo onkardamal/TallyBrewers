@@ -7,6 +7,13 @@ spring:
     username: ${DB_USERNAME:securebank_app}
     password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      max-lifetime: 60000
+      idle-timeout: 30000
+      connection-timeout: 20000
+      validation-timeout: 5000
+      minimum-idle: 2
+      maximum-pool-size: 10
 
   jpa:
     hibernate:
