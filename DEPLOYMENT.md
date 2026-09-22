@@ -24,15 +24,19 @@ graph TD
 
 ---
 
-## 2. Database Provisioning & Schema Migration
+## 2. Database Provisioning & Schema Migration (Supabase)
 
-1. Create a PostgreSQL database on **Neon**, **Railway**, or **Supabase**.
-2. Retrieve the JDBC Connection URL, username, and password.
-3. Flyway migrations run automatically upon backend startup. There is no need to manually upload schemas. The backend's `spring.jpa.hibernate.ddl-auto` is set to `validate` to ensure JPA entity validation against the Flyway migrations schema.
+1. Provisioned on **Supabase** (`securebank` project on AWS Asia-Pacific infrastructure):
+   - **Host**: `aws-0-ap-northeast-1.pooler.supabase.com`
+   - **Port**: `5432`
+   - **Database**: `postgres` (with `sslmode=require`)
+   - **User**: `postgres.jicybacsvchsngbnlcpe`
+2. Flyway migrations (`V1` through `V4`) run automatically upon backend startup, creating all core tables (`users`, `passkeys`, `recovery_codes`, `sessions`, `email_verifications`, `audit_logs`).
+3. Spring Boot JPA entity validation (`spring.jpa.hibernate.ddl-auto=validate`) confirms schema alignment against Flyway migrations.
 
 ---
 
-## 3. Backend Deployment (Railway / Render / Fly.io)
+## 3. Backend Deployment
 
 ### Step 1: Package the Application
 The backend builds into a runnable fat JAR. Run the Maven packaging command:
@@ -42,16 +46,16 @@ The backend builds into a runnable fat JAR. Run the Maven packaging command:
 The resulting JAR will be under `auth-service/target/auth-service-0.0.1-SNAPSHOT.jar`.
 
 ### Step 2: Configure Environment Variables
-You must configure the following environment variables in your deployment dashboard:
+Configure the following environment variables in your deployment target:
 
-| Variable Name | Description | Example Value |
+| Variable Name | Description | Active Configuration |
 | :--- | :--- | :--- |
-| `SERVER_PORT` | Port for the Spring Boot server. | `8080` (or injected automatically) |
-| `DB_HOST` | PostgreSQL server hostname. | `ep-cool-water-12345.us-east-2.aws.neon.tech` |
+| `SERVER_PORT` | Port for the Spring Boot server. | `8080` |
+| `DB_HOST` | PostgreSQL server hostname. | `aws-0-ap-northeast-1.pooler.supabase.com` |
 | `DB_PORT` | PostgreSQL port. | `5432` |
-| `DB_NAME` | Database name. | `securebank` |
-| `DB_USERNAME` | Database connection username. | `securebank_app` |
-| `DB_PASSWORD` | Database connection password. | `super-secure-db-password` |
+| `DB_NAME` | Database name with SSL query. | `postgres?sslmode=require` |
+| `DB_USERNAME` | Database connection username. | `postgres.jicybacsvchsngbnlcpe` |
+| `DB_PASSWORD` | Database connection password. | Configured in `.env` |
 | `JWT_SECRET` | 256-bit hex/base64 key for JWT signing. | `32-byte-long-high-entropy-string-here` |
 | `JWT_ISSUER` | Configured issuer claim for JWT tokens. | `securebank-auth-service` |
 | `JWT_AUDIENCE` | Configured audience claim for JWT tokens. | `securebank-app` |

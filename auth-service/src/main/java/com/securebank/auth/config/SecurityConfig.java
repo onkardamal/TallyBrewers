@@ -126,8 +126,17 @@ public class SecurityConfig {
 
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Dynamic allowed origin resolved from securebank.webauthn.origin property.
-        configuration.setAllowedOrigins(List.of(properties.getWebauthn().getOrigin()));
+        java.util.Set<String> origins = new java.util.LinkedHashSet<>();
+        if (properties.getWebauthn().getOrigin() != null) {
+            origins.add(properties.getWebauthn().getOrigin());
+        }
+        origins.add("https://securebank-pink.vercel.app");
+        origins.add("http://localhost:5173");
+        origins.add("http://localhost:4173");
+        origins.add("http://localhost:3000");
+        origins.add("http://127.0.0.1:5173");
+        origins.add("http://127.0.0.1:4173");
+        configuration.setAllowedOrigins(new java.util.ArrayList<>(origins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
         configuration.setExposedHeaders(List.of("Set-Cookie"));

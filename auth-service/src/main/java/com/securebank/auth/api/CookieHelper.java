@@ -25,7 +25,7 @@ public class CookieHelper {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Lax")
+                .sameSite("None")
                 .path("/")
                 .maxAge(properties.getJwt().getRefreshTokenTtlMinutes() * 60L)
                 .build();
@@ -39,7 +39,7 @@ public class CookieHelper {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Lax")
+                .sameSite("None")
                 .path("/")
                 .maxAge(0)
                 .build();

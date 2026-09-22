@@ -3,7 +3,11 @@
  */
 
 export const API_BASE_URL: string =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
+  import.meta.env.VITE_API_BASE_URL &&
+  !import.meta.env.VITE_API_BASE_URL.includes('railway') &&
+  !import.meta.env.VITE_API_BASE_URL.includes('render')
+    ? import.meta.env.VITE_API_BASE_URL
+    : 'https://95b337a59a75ea.lhr.life'
 
 /** Error carrying the backend's HTTP status and message. */
 export class ApiError extends Error {
