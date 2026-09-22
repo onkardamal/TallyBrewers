@@ -1,5 +1,6 @@
 /**
  * Base HTTP client for the SecureBank authentication API.
+ * Connected to live backend at https://95b337a59a75ea.lhr.life
  */
 
 export const API_BASE_URL: string =
